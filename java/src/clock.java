@@ -24,6 +24,8 @@ public class clock {
 		return count;
 	}
 	
+	// dump
+	// dump the clock info to a String
 	public String dump() {
 		return "Clock: " + this.getTick();
 	}
