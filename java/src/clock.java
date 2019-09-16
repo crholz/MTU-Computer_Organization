@@ -34,11 +34,18 @@ public class clock {
 	// 16 bit unsigned integer
 	// Can never exceed 65535, and if it does, reset back to zero
 	// @param tickAmount The amount of ticks to increase the clock count by
-	public void tick(int tickAmount) {
-		this.count += tickAmount;
+	public void tickSet(int tickAmount) {
+		if (this.count > 65535)
+			reset();
 		
-		if (this.count > 65535) {
-			this.count = this.count - 65536;
+		for(int i = 0; i < tickAmount; i++) {
+			tick();
 		}
 	}
+	
+	public void tick() {
+		this.count += 1;
+	}
+	
+	
 }
