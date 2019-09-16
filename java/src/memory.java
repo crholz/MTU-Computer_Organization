@@ -1,15 +1,16 @@
 import java.util.ArrayList;
 
 public class memory {
-	ArrayList storage;
+	int[][] mem;
+	int memCap;
 	
 	public memory() {
-		this.storage = new ArrayList();
+		this.mem = new int[17][1];
+	}
+	
+	public void create(int memoryCap) {
+		this.memCap = memoryCap;
 	}
 	
 	
-	
-	public setMemory(int address, ) {
-		
-	}
 }
