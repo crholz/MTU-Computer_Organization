@@ -1,40 +1,29 @@
+import java.util.*;
+
 public class memory {
-	int[][] mem;
+	ArrayList<Object> mem;
 	int memCap;
 	
 	public memory() {
-		this.mem = new int[17][1];
+		this.mem = new ArrayList<Object>();
 	}
 	
 	public void create(int memoryCap) {
 		this.memCap = memoryCap;
 	}
 	
-	public void set(int memAddress) {
-		
-		boolean exists = false;
-		
-		for(int i = 0; i < mem[1].length; i++) {
-			if (memAddress == mem[1][i])
-				exists = true;
+	public void set(int memAddress, int hexAmount, int[] params) {
+		for (int i = 0; i < this.mem.size(); i++) {
+			if ((this.mem.get(i))[0] == memAddress) {
+				
+			}
 		}
-		
-		if (!exists) {
-			add();
-		}
-		
-		else {
-			return 0;
-		}
+		int[] test = new int[5];
+		mem.add(test);
 	}
 	
 	public void reset() {
 		
 	}
-	
-	public void add() {
-		
-	}
-	
 	
 }
