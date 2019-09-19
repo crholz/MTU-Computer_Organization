@@ -44,7 +44,7 @@ public class memory {
 			}
 			
 			if (!added)
-				mem.add(newArr);
+				this.mem.add(newArr);
 		}
 	}
 	
@@ -69,7 +69,9 @@ public class memory {
 	}
 	
 	public void reset() {
-		
+		while (this.mem.size() > 0) {
+			this.mem.clear();
+		}
 	}
 	
 }

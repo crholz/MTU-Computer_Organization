@@ -6,11 +6,15 @@
 
 public class clock {
 	int count;
+	cpu linkedCPU;
+	memory linkedMemory;
 	
 	// Constructor
 	// Create a new clock object with a count
-	public clock() {
+	public clock(cpu newCPU, memory newMemory) {
 		this.count = 0;
+		linkedCPU = newCPU;
+		linkedMemory = newMemory;
 	}
 	
 	// reset
@@ -45,6 +49,7 @@ public class clock {
 	
 	public void tick() {
 		this.count += 1;
+		linkedCPU.cycle();
 	}
 	
 	

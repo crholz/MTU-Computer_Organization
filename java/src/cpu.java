@@ -3,11 +3,16 @@ import java.util.ArrayList;
 public class cpu {
 	int[] registers;
 	String readFile;
-	ArrayList getFrom;
+	ArrayList<int[]> getFrom;
+	int location;
+	int memLoc;
 	
-	public cpu(ArrayList memory) {
+	public cpu(ArrayList<int[]> memory) {
 		this.registers = new int[9];
+		this.registers[0] = 0;
 		this.getFrom = memory;	
+		this.location = 0;
+		this.memLoc = 1;
 	}
 	
 	// reset
@@ -21,6 +26,37 @@ public class cpu {
 		}
 	}
 	
+	public void cycle() {
+		if (getFrom.size() > 0) {
+			this.registers[0]++;
+			if (this.location < getFrom.size()) {
+				if (this.memLoc < getFrom.get(location).length) {
+					for (int i = 1; i < this.registers.length - 1; i++)
+						this.registers[1 + i] = this.registers[i];
+					
+					this.registers[1] = getFrom.get(this.location)[this.memLoc];
+					this.memLoc++;
+				}
+				
+				else if (memLoc > getFrom.get(location).length) {
+					this.memLoc = 1;
+					this.location++;
+					
+					if (this.location < getFrom.size()) {
+						for (int i = 1; i < this.registers.length - 1; i++)
+							this.registers[1 + i] = this.registers[i];
+						
+						this.registers[1] = getFrom.get(this.location)[this.memLoc];
+						this.memLoc++;
+					}
+				}
+			}	
+		}
+		
+		else
+			this.registers[0]++;
+	}
+	
 	/*
 	 * Set
 	 * set the specified register to a hexbyte
@@ -30,6 +66,8 @@ public class cpu {
 	public void set(String register, int hexByte) {
 		this.registers[((int) register.charAt(1)) - 64] = hexByte;
 	}
+	
+	
 	
 	// Dumps the CPU Information
 	// returns a string
