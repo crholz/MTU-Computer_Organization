@@ -1,11 +1,13 @@
+import java.util.ArrayList;
 
 public class cpu {
 	int[] registers;
 	String readFile;
+	ArrayList getFrom;
 	
-	public cpu(String input) {
+	public cpu(ArrayList memory) {
 		this.registers = new int[9];
-		this.readFile = input;
+		this.getFrom = memory;	
 	}
 	
 	// reset

@@ -16,7 +16,11 @@ public class memory {
 		int found = -1;
 		for (int i = 0; i < this.mem.size(); i++) {
 			if ((this.mem.get(i))[0] == memAddress) {
-				// Get and change the memory
+				for (int j = 1; j < hexAmount; j++) {
+					this.mem.get(i)[j] = params[j - 1];
+				}
+				
+				
 				found = i;
 				break;
 			}
@@ -33,7 +37,7 @@ public class memory {
 			
 			for (int i = 0; i < mem.size(); i++) {
 				if (this.mem.get(i)[0] > memAddress) {
-					mem.add(i, newArr);
+					this.mem.add(i, newArr);
 					added = true;
 					break;
 				}
