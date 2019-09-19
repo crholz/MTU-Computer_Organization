@@ -53,11 +53,11 @@ public class memory {
 	}
 	
 	public String dump() {
-		String builder = "Addr\t00\t01\t02\t\03\t04\t05\t06\t07\t08\t09\t0A\t0B\t0C\t0D\t0E\t0F\n";
+		String builder = "Addr\t00\t01\t02\t03\t04\t05\t06\t07\t08\t09\t0A\t0B\t0C\t0D\t0E\t0F\n";
 		
 		for (int i = 0; i < this.mem.size(); i++) {
-			for (int j = 0; j < this.mem.get(j).length; j++) {
-				if (j == this.mem.get(j).length - 1)
+			for (int j = 0; j < this.mem.get(i).length; j++) {
+				if (j == this.mem.get(i).length - 1)
 					builder = builder + Integer.toHexString(this.mem.get(i)[j]) + "\n";
 				else
 					builder = builder + Integer.toHexString(this.mem.get(i)[j]) + "\t";

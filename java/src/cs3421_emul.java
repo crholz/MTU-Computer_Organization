@@ -15,6 +15,7 @@ public class cs3421_emul {
 	    	 Scanner reader = new Scanner(file);
 	    	 while (reader.hasNextLine()) {
 	    		 String line = reader.nextLine();
+	    		 System.out.println(line);
 	    		 parse(line);
 	         	}
 	    	 } 
@@ -25,7 +26,8 @@ public class cs3421_emul {
 	}
 	
 	private void parse(String command) {
-		String[] commandLine = command.split(" ");
+		String[] commandLine = command.split("\n");
+		commandLine = commandLine[0].split(" ");
 		
 		switch(commandLine[0].toLowerCase()) {
 		
@@ -34,45 +36,62 @@ public class cs3421_emul {
 			switch(commandLine[1].toLowerCase()) {
 			case "reset":
 				myCpu.reset();
+				break;
 				
 			case "set":
 				myCpu.set(commandLine[2], parseHex(commandLine[3]));
+				break;
 				
 			case "dump":
 				System.out.println(myCpu.dump());
-				
+				break;
+			
 			}
+			break;
 		
 		case "memory":
 			
 			switch(commandLine[1].toLowerCase()) {
 			case "create":
 				myMemory.create(parseHex(commandLine[2]));
+				break;
 				
 			case "reset":
-				
+				myMemory.reset();
+				break;
 				
 			case "dump":
 				System.out.println(myMemory.dump());
+				break;
 				
 			case "set":
+				int[] myParamSet = new int[parseHex(commandLine[3])];
+				for (int i = 4; i < commandLine.length; i++)
+					myParamSet[i-4] = parseHex(commandLine[i]);
 				
+				myMemory.set(parseHex(commandLine[2]), parseHex(commandLine[3]), myParamSet);
+				break;
 				
 			}
+			break;
 			
 		case "clock":
 			
 			switch (commandLine[1].toLowerCase()) {
 			case "reset":
 				myClock.reset();
+				break;
 				
 			case "tick":
-				myClock.tickSet(Integer.parseInt(commandLine[3]));
+				myClock.tickSet(Integer.parseInt(commandLine[2]));
+				break;
 				
 			case "dump":
 				System.out.println(myClock.dump());
+				break;
 				
 			}
+			break;
 		}
 	}
 	

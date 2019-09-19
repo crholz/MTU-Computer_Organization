@@ -13,8 +13,8 @@ public class clock {
 	// Create a new clock object with a count
 	public clock(cpu newCPU, memory newMemory) {
 		this.count = 0;
-		linkedCPU = newCPU;
-		linkedMemory = newMemory;
+		this.linkedCPU = newCPU;
+		this.linkedMemory = newMemory;
 	}
 	
 	// reset
@@ -25,7 +25,7 @@ public class clock {
 	
 	//@returns the tick amount only
 	public int getTick() {
-		return count;
+		return this.count;
 	}
 	
 	// dump
@@ -49,7 +49,7 @@ public class clock {
 	
 	public void tick() {
 		this.count += 1;
-		linkedCPU.cycle();
+		this.linkedCPU.cycle();
 	}
 	
 	

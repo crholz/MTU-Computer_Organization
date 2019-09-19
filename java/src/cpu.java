@@ -21,7 +21,7 @@ public class cpu {
 	public void reset() {
 		
 		// Iterate through all of the registers and set them to 0
-		for (int i = 1; i < 10; i++) {
+		for (int i = 1; i < registers.length; i++) {
 			registers[i] = 0;
 		}
 	}
@@ -29,10 +29,10 @@ public class cpu {
 	public void cycle() {
 		if (getFrom.size() > 0) {
 			this.registers[0]++;
-			if (this.location < getFrom.size()) {
-				if (this.memLoc < getFrom.get(location).length) {
+			if (this.location < this.getFrom.size()) {
+				if (this.memLoc < this.getFrom.get(this.location).length) {
 					for (int i = 1; i < this.registers.length - 1; i++)
-						this.registers[1 + i] = this.registers[i];
+						this.registers[i + 1] = this.registers[i];
 					
 					this.registers[1] = getFrom.get(this.location)[this.memLoc];
 					this.memLoc++;
@@ -76,11 +76,11 @@ public class cpu {
 		String builder;
 		
 		// Bump the PC
-		builder = "PC: 0x" + toHex(registers[0]) + "\n";
+		builder = "PC: 0x" + toHex(this.registers[0]) + "\n";
 		
 		// Dump each register
-		for (int i = 1; i < 10; i++) {
-			builder = builder + "R" + (char) (65 + (i - 1)) + ": 0x" + toHex(registers[i]);
+		for (int i = 1; i < this.registers.length; i++) {
+			builder = builder + "R" + (char) (65 + (i - 1)) + ": 0x" + toHex(this.registers[i]);
 			if (i < 9) {
 				builder = builder + "\n";
 			}
