@@ -48,6 +48,10 @@ public class memory {
 		}
 	}
 	
+	public void setFromFile(String myFile) {
+		
+	}
+	
 	public String dump() {
 		String builder = "Addr\t00\t01\t02\t\03\t04\t05\t06\t07\t08\t09\t0A\t0B\t0C\t0D\t0E\t0F\n";
 		
