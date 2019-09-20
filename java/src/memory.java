@@ -52,7 +52,7 @@ public class memory {
 		
 	}
 	
-	public String dump() {
+	public String fullDump() {
 		String builder = "Addr\t00\t01\t02\t03\t04\t05\t06\t07\t08\t09\t0A\t0B\t0C\t0D\t0E\t0F\n";
 		
 		for (int i = 0; i < this.mem.size(); i++) {
@@ -63,6 +63,27 @@ public class memory {
 					builder = builder + Integer.toHexString(this.mem.get(i)[j]) + "\t";
 			}
 		}
+		
+		
+		return builder;
+	}
+	
+	public String dump(int hexAddress, int hexAmount) {
+		String builder = "Addr\t00\t01\t02\t03\t04\t05\t06\t07\t08\t09\t0A\t0B\t0C\t0D\t0E\t0F\n";
+		
+		int node = -1;
+		
+		for (int i = 0; i < this.mem.size(); i++) {
+			if (this.mem.get(i)[0] == hexAddress) {
+				node = i;
+				break;
+			}
+			
+			else {
+				
+			}
+		}
+		
 		
 		
 		return builder;
