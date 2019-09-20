@@ -31,8 +31,8 @@ public class cpu {
 			this.registers[0]++;
 			if (this.location < this.getFrom.size()) {
 				if (this.memLoc < this.getFrom.get(this.location).length) {
-					for (int i = 1; i < this.registers.length - 1; i++)
-						this.registers[i + 1] = this.registers[i];
+					for (int i = this.registers.length - 1; i > 1; i--)
+						this.registers[i] = this.registers[i - 1];
 					
 					this.registers[1] = getFrom.get(this.location)[this.memLoc];
 					this.memLoc++;
@@ -43,8 +43,8 @@ public class cpu {
 					this.location++;
 					
 					if (this.location < getFrom.size()) {
-						for (int i = 1; i < this.registers.length - 1; i++)
-							this.registers[1 + i] = this.registers[i];
+						for (int i = this.registers.length - 1; i > 1; i--)
+							this.registers[i] = this.registers[i - 1];
 						
 						this.registers[1] = getFrom.get(this.location)[this.memLoc];
 						this.memLoc++;
@@ -90,6 +90,10 @@ public class cpu {
 	}
 	
 	private String toHex(int convertNum) {
-		return Integer.toHexString(convertNum);
+		String builder = Integer.toHexString(convertNum);
+		if (builder.length() < 2)
+			builder = "0" + builder;
+		
+		return builder;
 	}
 }
