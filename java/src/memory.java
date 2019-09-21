@@ -1,3 +1,5 @@
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.*;
 
 public class memory {
@@ -48,19 +50,44 @@ public class memory {
 		}
 	}
 	
-	public void setFromFile(String myFile) {
-		
+	public void setFromFile(String myFile, int memAdd) {
+		 File file = new File(myFile);
+	     try {
+	    	 Scanner reader = new Scanner(file);
+	    	 ArrayList<String> additions = new ArrayList<String>();
+	    	 while (reader.hasNextLine()) {
+	    		 String line = reader.nextLine();
+	    		 String[] readContents = line.split(" ");
+	    		 for (int i = 0; i < readContents.length; i++) {
+	    			 additions.add(readContents[i]);
+	    		 }
+	    		 
+	    		 int[] setParams = new int[additions.size()];
+	    		 setParams[0] = memAdd;
+	    		 for (int i = 1; i < additions.size(); i++) {
+	    			 if (additions.get(i).split("x").length > 1)
+	    				 additions.set(i ,additions.get(i).split("x")[1]);
+	    			 setParams[i] = Integer.parseInt(additions.get(i), 16);
+	    		 }
+	    		 
+	    		 set(memAdd, setParams.length, setParams);
+	    		 
+	         	}
+	    	 } 
+	     catch (FileNotFoundException e) {
+	            e.printStackTrace();
+	        }
 	}
 	
 	public String fullDump() {
-		String builder = "Addr\t00\t01\t02\t03\t04\t05\t06\t07\t08\t09\t0A\t0B\t0C\t0D\t0E\t0F\n";
+		String builder = "Addr 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F\n";
 		
 		for (int i = 0; i < this.mem.size(); i++) {
 			for (int j = 0; j < this.mem.get(i).length; j++) {
 				if (j == this.mem.get(i).length - 1)
 					builder = builder + Integer.toHexString(this.mem.get(i)[j]) + "\n";
 				else
-					builder = builder + Integer.toHexString(this.mem.get(i)[j]) + "\t";
+					builder = builder + Integer.toHexString(this.mem.get(i)[j]) + " ";
 			}
 		}
 		
@@ -68,20 +95,71 @@ public class memory {
 		return builder;
 	}
 	
-	public String dump(int hexAddress, int hexAmount) {
-		String builder = "Addr\t00\t01\t02\t03\t04\t05\t06\t07\t08\t09\t0A\t0B\t0C\t0D\t0E\t0F\n";
+	public String dump(int hexAddress, int loc, int hexAmount) {
+		String builder = "Addr\t00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F\n";
 		
 		int node = -1;
+		int amountLeft = hexAmount;
+		boolean isWriting = false;
 		
 		for (int i = 0; i < this.mem.size(); i++) {
 			if (this.mem.get(i)[0] == hexAddress) {
 				node = i;
 				break;
 			}
-			
-			else {
-				
+		}
+		
+		for (int i = 0; i < this.mem.size(); i++) {
+			if (!isWriting && i != node) {
+				builder = builder + "0x" + Integer.toHexString(this.mem.get(i)[0]).toUpperCase() + "\n";
 			}
+			
+			else if(i == node) {
+				isWriting = true;
+				builder = builder + "0x" + Integer.toHexString(this.mem.get(i)[0]).toUpperCase() + "\t";
+				for (int j = 1; j < this.mem.get(i).length; j++) {
+					if (j < loc + 1) {
+						builder = builder + "   ";
+					}
+					
+					else if (j >= loc + 1 && j != this.mem.get(i).length - 1 && amountLeft > 0){
+						builder = builder + Integer.toHexString(this.mem.get(i)[j]).toUpperCase() + " ";
+						amountLeft--;
+					}
+					
+					else if (j >= loc + 1 && j == this.mem.get(i).length - 1 && amountLeft > 0) {
+						builder = builder + Integer.toHexString(this.mem.get(i)[j]).toUpperCase() + "\n";
+						amountLeft--;
+					}
+				}
+			}
+			
+			if (i > node && amountLeft > 0) {
+				builder = builder + "0x" + Integer.toHexString(this.mem.get(i)[0]).toUpperCase() + "\t";
+				for (int k = 1; k < this.mem.get(i).length; k++) {
+					if (k != this.mem.get(i).length - 1 && amountLeft > 0) {
+						builder = builder + Integer.toHexString(this.mem.get(i)[k]).toUpperCase() + " ";
+						amountLeft--;
+						if (amountLeft == 0) {
+							builder = builder + "\n";
+							isWriting = false;
+							break;
+						}	
+					}
+					
+					else if (k == this.mem.get(i).length - 1 && amountLeft > 0) {
+						builder = builder + Integer.toHexString(this.mem.get(i)[k]).toUpperCase() + "\n";
+						amountLeft--;
+						if (amountLeft == 0) {
+							isWriting = false;
+							break;
+						}
+					}
+				}
+			}
+			
+			
+			
 		}
 		
 		

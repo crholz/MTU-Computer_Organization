@@ -15,7 +15,6 @@ public class cs3421_emul {
 	    	 Scanner reader = new Scanner(file);
 	    	 while (reader.hasNextLine()) {
 	    		 String line = reader.nextLine();
-	    		 System.out.println(line);
 	    		 parse(line);
 	         	}
 	    	 } 
@@ -39,7 +38,7 @@ public class cs3421_emul {
 				break;
 				
 			case "set":
-				myCpu.set(commandLine[2], parseHex(commandLine[3]));
+				myCpu.set(commandLine[3], parseHex(commandLine[4]));
 				break;
 				
 			case "dump":
@@ -61,10 +60,21 @@ public class cs3421_emul {
 				break;
 				
 			case "dump":
-				System.out.println(myMemory.dump());
+				String baseAdd = commandLine[2];
+				baseAdd = baseAdd.substring(0, baseAdd.length() - 1);
+				baseAdd = baseAdd + "0";
+				String locAdd = commandLine[2].substring(commandLine[2].length() - 1);
+				
+				int amount = parseHex(commandLine[3]);
+				System.out.println(myMemory.dump(parseHex(baseAdd), parseHex(locAdd), amount));
 				break;
 				
 			case "set":
+				if (commandLine[3].toLowerCase().equals("file")) {
+					myMemory.setFromFile(commandLine[4] , parseHex(commandLine[2]));
+					break;
+				}
+				
 				int[] myParamSet = new int[parseHex(commandLine[3])];
 				for (int i = 4; i < commandLine.length; i++)
 					myParamSet[i-4] = parseHex(commandLine[i]);
@@ -96,7 +106,8 @@ public class cs3421_emul {
 	}
 	
 	private int parseHex(String hexString) {
-		hexString = hexString.split("x")[1];
+		if ((hexString.split("x")).length > 1)
+			hexString = hexString.split("x")[1];
 		return Integer.parseInt(hexString, 16);
 	}
 	

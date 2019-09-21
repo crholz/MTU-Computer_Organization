@@ -28,7 +28,7 @@ public class cpu {
 	
 	public void cycle() {
 		if (getFrom.size() > 0) {
-			this.registers[0]++;
+			this.registers[0] += 1;
 			if (this.location < this.getFrom.size()) {
 				if (this.memLoc < this.getFrom.get(this.location).length) {
 					for (int i = this.registers.length - 1; i > 1; i--)
@@ -54,7 +54,7 @@ public class cpu {
 		}
 		
 		else
-			this.registers[0]++;
+			this.registers[0] += 1;
 	}
 	
 	/*
@@ -64,7 +64,10 @@ public class cpu {
 	 * @hexByte the value to set the value to
 	 */
 	public void set(String register, int hexByte) {
-		this.registers[((int) register.charAt(1)) - 64] = hexByte;
+		if (register.toUpperCase().equals("PC"))
+			this.registers[0] = hexByte;
+		else
+			this.registers[((int) register.charAt(1)) - 64] = hexByte;
 	}
 	
 	
@@ -80,7 +83,7 @@ public class cpu {
 		
 		// Dump each register
 		for (int i = 1; i < this.registers.length; i++) {
-			builder = builder + "R" + (char) (65 + (i - 1)) + ": 0x" + toHex(this.registers[i]);
+			builder = builder + "R" + (char) (65 + (i - 1)) + ": 0x" + toHex(this.registers[i]).toUpperCase();
 			if (i < 9) {
 				builder = builder + "\n";
 			}
