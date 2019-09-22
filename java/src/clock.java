@@ -31,7 +31,7 @@ public class clock {
 	// dump
 	// dump the clock info to a String
 	public String dump() {
-		return "Clock: " + this.getTick();
+		return "Clock: " + this.getTick() + "\n";
 	}
 	
 	// Tick function

@@ -63,8 +63,7 @@ public class memory {
 	    		 }
 	    		 
 	    		 int[] setParams = new int[additions.size()];
-	    		 setParams[0] = memAdd;
-	    		 for (int i = 1; i < additions.size(); i++) {
+	    		 for (int i = 0; i < additions.size(); i++) {
 	    			 if (additions.get(i).split("x").length > 1)
 	    				 additions.set(i ,additions.get(i).split("x")[1]);
 	    			 setParams[i] = Integer.parseInt(additions.get(i), 16);
@@ -96,7 +95,7 @@ public class memory {
 	}
 	
 	public String dump(int hexAddress, int loc, int hexAmount) {
-		String builder = "Addr\t00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F\n";
+		String builder = "Addr   00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F\n";
 		
 		int node = -1;
 		int amountLeft = hexAmount;
@@ -110,35 +109,35 @@ public class memory {
 		}
 		
 		for (int i = 0; i < this.mem.size(); i++) {
-			if (!isWriting && i != node) {
-				builder = builder + "0x" + Integer.toHexString(this.mem.get(i)[0]).toUpperCase() + "\n";
-			}
-			
-			else if(i == node) {
+			if(i == node) {
 				isWriting = true;
-				builder = builder + "0x" + Integer.toHexString(this.mem.get(i)[0]).toUpperCase() + "\t";
+				builder = builder + "0x" + validateAdd(Integer.toHexString(this.mem.get(i)[0]).toUpperCase()) + " ";
 				for (int j = 1; j < this.mem.get(i).length; j++) {
 					if (j < loc + 1) {
 						builder = builder + "   ";
 					}
 					
 					else if (j >= loc + 1 && j != this.mem.get(i).length - 1 && amountLeft > 0){
-						builder = builder + Integer.toHexString(this.mem.get(i)[j]).toUpperCase() + " ";
+						builder = builder + validateSmall(Integer.toHexString(this.mem.get(i)[j]).toUpperCase()) + " ";
 						amountLeft--;
+						if (amountLeft == 0)
+							builder = builder + "\n";
 					}
 					
 					else if (j >= loc + 1 && j == this.mem.get(i).length - 1 && amountLeft > 0) {
-						builder = builder + Integer.toHexString(this.mem.get(i)[j]).toUpperCase() + "\n";
+						builder = builder + validateSmall(Integer.toHexString(this.mem.get(i)[j]).toUpperCase()) + "\n";
 						amountLeft--;
+						if (amountLeft == 0)
+							builder = builder + "\n";
 					}
 				}
 			}
 			
-			if (i > node && amountLeft > 0) {
-				builder = builder + "0x" + Integer.toHexString(this.mem.get(i)[0]).toUpperCase() + "\t";
+			else if (i > node && amountLeft > 0) {
+				builder = builder + "0x" + validateAdd(Integer.toHexString(this.mem.get(i)[0]).toUpperCase()) + " ";
 				for (int k = 1; k < this.mem.get(i).length; k++) {
 					if (k != this.mem.get(i).length - 1 && amountLeft > 0) {
-						builder = builder + Integer.toHexString(this.mem.get(i)[k]).toUpperCase() + " ";
+						builder = builder + validateSmall(Integer.toHexString(this.mem.get(i)[k]).toUpperCase()) + " ";
 						amountLeft--;
 						if (amountLeft == 0) {
 							builder = builder + "\n";
@@ -148,7 +147,7 @@ public class memory {
 					}
 					
 					else if (k == this.mem.get(i).length - 1 && amountLeft > 0) {
-						builder = builder + Integer.toHexString(this.mem.get(i)[k]).toUpperCase() + "\n";
+						builder = builder + validateSmall(Integer.toHexString(this.mem.get(i)[k]).toUpperCase()) + "\n";
 						amountLeft--;
 						if (amountLeft == 0) {
 							isWriting = false;
@@ -163,7 +162,6 @@ public class memory {
 		}
 		
 		
-		
 		return builder;
 	}
 	
@@ -171,6 +169,25 @@ public class memory {
 		while (this.mem.size() > 0) {
 			this.mem.clear();
 		}
+	}
+	
+	private String validateAdd(String hexStr) {
+		if (hexStr.length() >= 4)
+			return hexStr;
+		else
+			hexStr = "0" + hexStr;
+		
+		return validateAdd(hexStr);
+	}
+	
+	private String validateSmall(String smallHex) {
+		if (smallHex.length() >= 2)
+			return smallHex;
+		else
+			smallHex = "0" + smallHex;
+		
+		
+		return validateSmall(smallHex);
 	}
 	
 }
