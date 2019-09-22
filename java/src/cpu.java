@@ -1,3 +1,10 @@
+/*
+ * Corbin Holz
+ * crholz
+ * Michigan Techonological University
+ * Computer Organization
+ */
+
 import java.util.ArrayList;
 
 public class cpu {
@@ -26,6 +33,10 @@ public class cpu {
 		}
 	}
 	
+	/*
+	 * Cycle
+	 * Cycle the CPU through the memory and the registers
+	 */
 	public void cycle() {
 		if (getFrom.size() > 0) {
 			this.registers[0] += 1;
@@ -92,6 +103,10 @@ public class cpu {
 		return builder;
 	}
 	
+	/*
+	 * Change a Value to Hex
+	 * @convertNum Integer that is converted to Hex
+	 */
 	private String toHex(int convertNum) {
 		String builder = Integer.toHexString(convertNum);
 		if (builder.length() < 2)

@@ -3,6 +3,12 @@
  * Holds all of the information for the clock
 
  */
+/*
+ * Corbin Holz
+ * crholz
+ * Michigan Techonological University
+ * Computer Organization
+ */
 
 public class clock {
 	int count;
@@ -47,6 +53,10 @@ public class clock {
 		}
 	}
 	
+	/*
+	 * tick
+	 * Cycle the CPU
+	 */
 	public void tick() {
 		this.count += 1;
 		this.linkedCPU.cycle();
