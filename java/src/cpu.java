@@ -36,7 +36,7 @@ public class cpu {
 	public void reset() {
 		
 		// Iterate through all of the registers and set them to 0
-		for (int i = 1; i < registers.length; i++) {
+		for (int i =0; i < registers.length; i++) {
 			registers[i] = 0;
 		}
 	}
