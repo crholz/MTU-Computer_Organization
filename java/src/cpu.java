@@ -11,15 +11,23 @@ public class cpu {
 	int[] registers;
 	String readFile;
 	ArrayList<int[]> getFrom;
+	ArrayList<int[]> instructions;
+	memory memSetter;
+	instructionMemory inst;
 	int location;
 	int memLoc;
+	int instime;
 	
-	public cpu(ArrayList<int[]> memory) {
+	public cpu(memory memSrc, instructionMemory fetch, ArrayList<int[]> iMem) {
 		this.registers = new int[9];
 		this.registers[0] = 0;
-		this.getFrom = memory;	
+		this.getFrom = memSrc.mem;
+		this.instructions = iMem;
+		this.memSetter = memSrc;
 		this.location = 0;
 		this.memLoc = 1;
+		this.inst = fetch;
+		this.instime = 0;
 	}
 	
 	// reset
@@ -75,13 +83,36 @@ public class cpu {
 	 * @hexByte the value to set the value to
 	 */
 	public void set(String register, int hexByte) {
-		if (register.toUpperCase().equals("PC"))
+		if (register.toUpperCase().equals("PC")) {
 			this.registers[0] = hexByte;
+			this.instime = 0;
+		}
 		else
 			this.registers[((int) register.charAt(1)) - 64] = hexByte;
 	}
 	
-	
+	/*
+	 * eCycle
+	 * Operates the cpu as described by entropy assembler details
+	 */
+	public void eCycle() {
+		
+		instime++;
+		
+		// Action is completed
+		if (instime % 5 == 0 && instime != 0) {
+			
+			int getFrom = this.inst.getAt(this.registers[0]);
+			int indexVal = (this.registers[0] % 8) + 1;
+			
+			// Takes instruction from PC
+			entropy((this.instructions.get(getFrom))[indexVal]);
+			
+			// Increment the PC
+			this.registers[0] += 1;
+		}
+		
+	}
 	
 	// Dumps the CPU Information
 	// returns a string
@@ -113,5 +144,54 @@ public class cpu {
 			builder = "0" + builder;
 		
 		return builder;
+	}
+	
+	/*
+	 * entropy
+	 * Perform the entropy operation with binary
+	 * @binaryNum the number to change to binary
+	 */
+	private void entropy(int binaryNum) {
+		String binString = Integer.toBinaryString(binaryNum);
+		if (binString.length() < 20)
+			return;
+		
+		// NNN	DDD	SSS	TTT	IIIIIIII
+		// Ins  Des Src Trg	   IV
+		// First Three Characters
+		switch(binString.substring(0, 3)) {
+		
+		// Load Word
+		// Uses Destination and Target
+		// Data Memory => Register
+		case "101":
+			String lDst = binString.substring(3, 6);
+			String lTrg = binString.substring(9, 12);
+			
+			int loadTarget = Integer.parseInt(lTrg, 2) + 1;
+			int loadDestination = Integer.parseInt(lDst, 2) + 1;
+			
+			memSetter.instZero();
+			
+			this.registers[loadDestination] = getFrom.get(0)[this.registers[loadTarget] + 1];
+			
+			break;
+		
+		// Store Word
+		// Uses Source and Target
+		// Register => Data Memory
+		case "110":
+			String sSrc = binString.substring(6, 9);
+			String sTrg = binString.substring(9, 12);
+			
+			int[] toInsert = new int[1];
+			
+			toInsert[0] =this.registers[Integer.parseInt(sSrc, 2) + 1];
+			memSetter.set(0, 1, toInsert, Integer.parseInt(sTrg, 2) + 1);
+			
+			break;
+			
+		}
+		
 	}
 }

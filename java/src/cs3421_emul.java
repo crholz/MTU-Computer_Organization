@@ -18,8 +18,10 @@ public class cs3421_emul {
 	 * 
 	 */
 	memory myMemory = new memory();
-	cpu myCpu = new cpu(myMemory.mem);
+	instructionMemory myIMem = new instructionMemory();
+	cpu myCpu = new cpu(myMemory, myIMem, myIMem.iMem);
 	clock myClock = new clock(myCpu, myMemory);
+	
 	
 	/*
 	 * readFile
@@ -144,6 +146,75 @@ public class cs3421_emul {
 			}
 			break;
 		
+			// Start of the instruction memory Commands
+			case "imemory":
+						
+				switch(commandLine[1].toLowerCase()) {
+						
+					// Initiate the Memory
+					case "create":
+						myIMem.create(parseHex(commandLine[2]));
+						break;
+							
+					// Reset the Memory
+					case "reset":
+						myIMem.reset();
+						break;
+							
+					// Dump the Memory
+					case "dump":
+						String baseAdd = commandLine[2];
+							
+						// Find the base Address
+						baseAdd = baseAdd.substring(0, baseAdd.length() - 1);
+						baseAdd = baseAdd + "0";
+							
+						// Parse the location
+						String locAdd = commandLine[2].substring(commandLine[2].length() - 1);
+							
+						int amount = parseHex(commandLine[3]);
+						System.out.println(myIMem.dump(parseHex(baseAdd), parseHex(locAdd), amount));
+						break;
+						
+					// Set a value in the Memory
+					case "set":
+							
+						// Get the Address to Set
+						String setMem = commandLine[2];
+							
+						// Initiate the Location to Set
+						int loc = 0;
+							
+						// Find the base Address
+						if (commandLine[2].split("x").length > 1) {
+							setMem = commandLine[2].split("x")[1];
+						}
+							
+						// Find the location
+						loc = parseHex(setMem.substring(setMem.length() - 1));
+						if (setMem.length() > 1)
+							setMem = setMem.substring(0, setMem.length() - 1) + "0";
+						else
+							setMem = "0";
+							
+						// If reading from file
+						if (commandLine[3].toLowerCase().equals("file")) {
+							myIMem.setFromFile(commandLine[4] , parseHex(setMem), loc);
+							break;
+							}
+							
+						// If running through command
+						int[] myParamSet = new int[parseHex(commandLine[3])];
+						for (int i = 4; i < commandLine.length; i++)
+							myParamSet[i-4] = parseHex(commandLine[i]);
+							
+						myIMem.set(parseHex(setMem), parseHex(commandLine[3]), myParamSet, loc);
+						break;
+							
+				}
+				
+				break;
+			
 		// Start of the clock Commands
 		case "clock":
 			

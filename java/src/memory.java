@@ -302,4 +302,12 @@ public class memory {
 		return validateSmall(smallHex);
 	}
 	
+	/*
+	 * instZero
+	 * make sure that the first array is instantiated
+	 */
+	public void instZero() {
+		insert(0);
+	}
+	
 }

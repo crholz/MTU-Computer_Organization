@@ -59,7 +59,7 @@ public class clock {
 	 */
 	public void tick() {
 		this.count += 1;
-		this.linkedCPU.cycle();
+		this.linkedCPU.eCycle();
 	}
 	
 	
