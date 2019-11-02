@@ -17,6 +17,9 @@ public class cpu {
 	int location;
 	int memLoc;
 	int instime;
+	int status;
+	int instrTime;
+	boolean isHalt;
 	
 	public cpu(memory memSrc, instructionMemory fetch, ArrayList<int[]> iMem) {
 		this.registers = new int[9];
@@ -28,6 +31,9 @@ public class cpu {
 		this.memLoc = 1;
 		this.inst = fetch;
 		this.instime = 0;
+		this.status = 0;
+		this.instrTime = 0;
+		this.isHalt = false;
 	}
 	
 	// reset
@@ -97,9 +103,34 @@ public class cpu {
 	 */
 	public void eCycle() {
 		
+		// If No Action, get the next instruction.
+		if (this.status == 0) {
+			int getFrom = this.inst.getAt(this.registers[0]);
+			int indexVal = (this.registers[0] % 8) + 1;
+			
+			this.status = (this.instructions.get(getFrom))[indexVal];
+			
+			timer(this.status);
+			
+			instime = 0;
+		}
+		
 		instime++;
 		
-		// Action is completed
+		// If the correct amount of cycles
+		if (instime >= instrTime) {
+			int compTime = instrTime;
+			
+			entropy(status);
+			
+			if (compTime == instrTime)
+				this.registers[0]++;
+		}
+			
+		
+		// If currently doing an action
+		
+		/* Action is completed
 		if (instime % 5 == 0 && instime != 0) {
 			
 			int getFrom = this.inst.getAt(this.registers[0]);
@@ -111,6 +142,7 @@ public class cpu {
 			// Increment the PC
 			this.registers[0] += 1;
 		}
+		*/
 		
 	}
 	
@@ -153,8 +185,8 @@ public class cpu {
 	 */
 	private void entropy(int binaryNum) {
 		String binString = Integer.toBinaryString(binaryNum);
-		if (binString.length() < 20)
-			return;
+		while (binString.length() < 20)
+			binString = "0" + binString;
 		
 		// NNN	DDD	SSS	TTT	IIIIIIII
 		// Ins  Des Src Trg	   IV
@@ -175,6 +207,8 @@ public class cpu {
 			
 			this.registers[loadDestination] = getFrom.get(0)[this.registers[loadTarget] + 1];
 			
+			this.status = 0;
+			
 			break;
 		
 		// Store Word
@@ -186,12 +220,225 @@ public class cpu {
 			
 			int[] toInsert = new int[1];
 			
-			toInsert[0] =this.registers[Integer.parseInt(sSrc, 2) + 1];
-			memSetter.set(0, 1, toInsert, Integer.parseInt(sTrg, 2) + 1);
+			toInsert[0] = this.registers[Integer.parseInt(sSrc, 2) + 1];
+			memSetter.set(0, 1, toInsert, this.registers[Integer.parseInt(sTrg, 2) + 1]);
+			
+			this.status = 0;
+			
+			break;
+			
+		
+		// add
+		// Uses source and target
+		// Source + Target => Destination (8 bit two's complement)
+		case "000":
+			String addSrc = binString.substring(6, 9);
+			String addTrg = binString.substring(9, 12);
+			String addDst = binString.substring(3, 6);
+			
+			int addSource = this.registers[Integer.parseInt(addSrc, 2) + 1];
+			int addTarget = Integer.parseInt(addTrg, 2) + 1;
+			
+			int trgVal = this.registers[addTarget];
+			
+			memSetter.instZero();
+			
+			int addDestination = Integer.parseInt(addDst, 2) + 1;
+			
+			
+			this.registers[addDestination] = addSource + trgVal;
+			
+			this.status = 0;
+			
+			break;
+		
+		// addi
+		// Uses Source and immediate values
+		// Source + IV => Destination (8 bit two's complement)
+		case "001":
+			String addiSrc = binString.substring(6, 9);
+			String addiIV = binString.substring(12, binString.length());
+			String addiDst = binString.substring(3, 6);
+			
+			int addiSource = this.registers[Integer.parseInt(addiSrc, 2) + 1];
+			int addiImmediate = Integer.parseInt(addiIV, 2);
+			
+			int addiDestination = Integer.parseInt(addiDst, 2) + 1;
+			
+			this.registers[addiDestination] = addiSource + addiImmediate;
+			
+			this.status = 0;
+			
+			break;
+			
+		// mul
+		// Product of upper and lower 4 bits of Src register => Dst
+		case "010":
+			String mulSrc = binString.substring(6, 9);
+			String mulDst = binString.substring(3, 6);
+		
+			int mulSource = this.registers[Integer.parseInt(mulSrc, 2) + 1];
+			int mulDestination = Integer.parseInt(mulDst, 2) + 1;
+			
+			
+			String mulBin = Integer.toBinaryString(mulSource);
+			
+			while (mulBin.length() < 8)
+				mulBin = "0" + mulBin;
+			
+			int mul1Source = Integer.parseInt(mulBin.substring(0, 4), 2);
+			int mul2Source = Integer.parseInt(mulBin.substring(4, mulBin.length()), 2);
+
+			
+			this.registers[mulDestination] = mul1Source * mul2Source;
+			
+			this.status = 0;
+			
+			break;
+			
+			
+		// inv
+		// inverts all the bits in the source register and stores in destination
+		// ~(src) => Dst
+		case "011":
+			String invSrc = binString.substring(6, 9);
+			String invDst = binString.substring(3, 6);
+			
+			int invSource = this.registers[Integer.parseInt(invSrc, 2) + 1];
+			int invDestination = Integer.parseInt(invDst, 2) + 1;
+			
+			String invString = Integer.toBinaryString(~(invSource));
+			invString = invString.substring(invString.length() - 8, invString.length());
+			
+			this.registers[invDestination] = Integer.parseInt(invString, 2);
+			
+			this.status = 0;
+			
+			break;
+		
+		// beq
+		// If Src and Trg reg equal assign the PC to the imemory address. if not increment the PC
+		case "100":
+			String beqSrc = binString.substring(6, 9);
+			String beqTrg = binString.substring(9, 12);
+			
+			int beqSource = this.registers[Integer.parseInt(beqSrc, 2) + 1];
+			int beqTarget = Integer.parseInt(beqTrg, 2) + 1;
+			int beqTrgVal = this.registers[beqTarget];
+			
+			if (beqSource == beqTrgVal) {
+				if (this.instrTime == 1) {
+					this.instrTime++;
+				}
+				
+				
+				
+				int beqInsert = Integer.parseInt((binString.substring(12, binString.length())), 2);
+				
+				this.registers[0] = beqInsert;
+				
+				/*
+				int[] beqToInsert = new int[1];
+				
+				beqToInsert[0] = this.registers[0];
+				inst.set((int) Math.floor(beqInsert/16), 1, beqToInsert, (int) beqInsert % 16);
+				*/
+				
+				this.status = 0;
+				
+				return;
+			}
+			
+			else
+				this.status = 0;
+			
+			break;
+		
+		// halt
+		// Halts execution of the processor after incrementing PC
+		// Ignores future clock ticks
+		case "111":
+			this.isHalt = true;
+			
+			this.status = 0;
 			
 			break;
 			
 		}
+			
+	}
+	
+	/*
+	 * entropy
+	 * Perform the entropy operation with binary
+	 * @binaryNum the number to change to binary
+	 */
+	private void timer(int binaryNum) {
+		String binString = Integer.toBinaryString(binaryNum);
+		while (binString.length() < 20)
+			binString = "0" + binString;
 		
+		// NNN	DDD	SSS	TTT	IIIIIIII
+		// Ins  Des Src Trg	   IV
+		// First Three Characters
+		switch(binString.substring(0, 3)) {
+		
+		// Load Word
+		// Uses Destination and Target
+		// Data Memory => Register
+		case "101":
+			this.instrTime = 5;
+			break;
+		
+		// Store Word
+		// Uses Source and Target
+		// Register => Data Memory
+		case "110":
+			this.instrTime = 5;
+			break;
+			
+		
+		// add
+		// Uses source and target
+		// Source + Target => Destination (8 bit two's complement)
+		case "000":
+			this.instrTime = 1;
+			break;
+		
+		// addi
+		// Uses Source and immediate values
+		// Source + IV => Destination (8 bit two's complement)
+		case "001":
+			this.instrTime = 1;
+			break;
+			
+		// mul
+		// Product of upper and lower 4 bits of Src register => Dst
+		case "010":
+			this.instrTime = 2;
+			break;
+			
+			
+		// inv
+		// inverts all the bits in the source register and stores in destination
+		// ~(src) => Dst
+		case "011":
+			this.instrTime = 1;
+			break;
+		
+		// beq
+		// If Src and Trg reg equal assign the PC to the imemory address. if not increment the PC
+		case "100":
+			this.instrTime = 1;
+			break;
+		
+		// halt
+		// Halts execution of the processor after incrementing PC
+		// Ignores future clock ticks
+		case "111":
+			this.instrTime = 1;
+			break;
+		}
+			
 	}
 }

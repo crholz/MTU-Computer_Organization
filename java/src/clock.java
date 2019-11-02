@@ -58,6 +58,9 @@ public class clock {
 	 * Cycle the CPU
 	 */
 	public void tick() {
+		if (this.linkedCPU.isHalt)
+			return;
+		
 		this.count += 1;
 		this.linkedCPU.eCycle();
 	}
