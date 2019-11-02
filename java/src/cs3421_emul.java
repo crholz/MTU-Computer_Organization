@@ -106,6 +106,7 @@ public class cs3421_emul {
 				
 				int amount = parseHex(commandLine[3]);
 				System.out.println(myMemory.dump(parseHex(baseAdd), parseHex(locAdd), amount));
+				
 				break;
 			
 			// Set a value in the Memory

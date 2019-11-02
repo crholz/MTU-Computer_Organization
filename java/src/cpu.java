@@ -175,7 +175,7 @@ public class cpu {
 		if (builder.length() < 2)
 			builder = "0" + builder;
 		
-		return builder;
+		return builder.toUpperCase();
 	}
 	
 	/*

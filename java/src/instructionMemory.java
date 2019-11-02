@@ -201,6 +201,8 @@ public class instructionMemory {
 		// the base of the dump
 		String builder = "Addr       0     1     2     3     4     5     6     7\n";
 		
+		insert(hexAddress);
+		
 		int node = -1;
 		int amountLeft = hexAmount;
 		int additionalAdd = hexAddress;
@@ -274,6 +276,8 @@ public class instructionMemory {
 			
 		}
 		
+		if (builder.substring(builder.length() - 2, builder.length()).equals("\n\n"))
+			builder = builder.substring(0, builder.length() - 1);
 		
 		return builder;
 	}

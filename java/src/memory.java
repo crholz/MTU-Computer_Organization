@@ -186,6 +186,9 @@ public class memory {
 		// the base of the dump
 		String builder = "Addr   00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F\n";
 		
+		// Instantiate if doesn't exist
+		insert(hexAddress);
+		
 		int node = -1;
 		int amountLeft = hexAmount;
 		int additionalAdd = hexAddress;
@@ -259,6 +262,8 @@ public class memory {
 			
 		}
 		
+		if (builder.substring(builder.length() - 2, builder.length()).equals("\n\n"))
+			builder = builder.substring(0, builder.length() - 1);
 		
 		return builder;
 	}
