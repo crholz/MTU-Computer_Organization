@@ -45,6 +45,8 @@ public class cpu {
 		for (int i =0; i < registers.length; i++) {
 			registers[i] = 0;
 		}
+		
+		this.isHalt = false;
 	}
 	
 	/*
