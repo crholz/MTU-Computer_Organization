@@ -22,7 +22,7 @@ public class cpu {
 	boolean isHalt;
 	
 	public cpu(memory memSrc, instructionMemory fetch, ArrayList<int[]> iMem) {
-		this.registers = new int[9];
+		this.registers = new int[10];
 		this.registers[0] = 0;
 		this.getFrom = memSrc.mem;
 		this.instructions = iMem;
@@ -95,6 +95,11 @@ public class cpu {
 			this.registers[0] = hexByte;
 			this.instime = 0;
 		}
+		
+		else if (register.toUpperCase().contentEquals("TC")) {
+			this.registers[9] = hexByte;
+		}
+		
 		else
 			this.registers[((int) register.charAt(1)) - 64] = hexByte;
 	}
@@ -104,6 +109,8 @@ public class cpu {
 	 * Operates the cpu as described by entropy assembler details
 	 */
 	public void eCycle() {
+		
+		this.registers[9] += 1;
 		
 		// If No Action, get the next instruction.
 		if (this.status == 0) {
@@ -154,7 +161,7 @@ public class cpu {
 		// Create a string used to append all of the data together
 		String builder;
 		
-		// Bump the PC
+		// Dump the PC
 		builder = "PC: 0x" + toHex(this.registers[0]) + "\n";
 		
 		// Dump each register
@@ -164,6 +171,9 @@ public class cpu {
 				builder = builder + "\n";
 			}
 		}
+		
+		// Dump the TC
+		builder = builder + "TC: " + this.registers[9] + "\n";
 		
 		return builder;
 	}
