@@ -218,8 +218,11 @@ public class cpu {
 			int loadDestination = Integer.parseInt(lDst, 2) + 1;
 			
 			memSetter.instZero();
+			for (int i = 0; i < 16; i++) {
+				memSetter.insertNew(i * 16);
+			}
 			
-			this.registers[loadDestination] = getFrom.get(0)[this.registers[loadTarget] + 1];
+			this.registers[loadDestination] = getFrom.get((int) this.registers[loadTarget] / 16)[(this.registers[loadTarget] % 16) + 1];
 			
 			
 			// If Cache is on and cacheLine not set
@@ -236,7 +239,7 @@ public class cpu {
 			
 			
 			// If Cache is on and cache line set, but does not match
-			else if (!cpuCache.checkCLO(getFrom.get(0)[this.registers[loadTarget]]) && cpuCache.getStatus() && cpuCache.getSet()) {
+			else if (cpuCache.getStatus() && cpuCache.getSet() && !cpuCache.checkCLO(getFrom.get((int) this.registers[loadTarget] / 16)[(this.registers[loadTarget] % 16)])) {
 				for (int i = 0; i < cpuCache.data.length; i++)
 					cpuCache.data[i] = getFrom.get(0)[i + 1];
 				
@@ -472,9 +475,13 @@ public class cpu {
 			
 			this.instrTime = 5;
 			
-			if (cpuCache.getStatus() && cpuCache.getSet() && cpuCache.checkCLO(getFrom.get(0)[this.registers[targetNum]]))
+			for (int i = 1; i < 16; i++) {
+				memSetter.insertNew(i * 16);
+			}
+			
+			if (cpuCache.getStatus() && cpuCache.getSet() && cpuCache.checkCLO(getFrom.get((int) this.registers[targetNum] / 16)[this.registers[targetNum] % 16]))
 				for (int i = 0; i < cpuCache.data.length; i++)
-					if ((getFrom.get(0)[this.registers[Integer.parseInt(binString.substring(9, 12), 2) + 1] + 1]) == cpuCache.data[i])
+					if ((getFrom.get((int) this.registers[targetNum] / 16)[this.registers[targetNum] % 16]) == cpuCache.data[i])
 						instrTime = 1;
 			
 			break;

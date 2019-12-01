@@ -118,6 +118,36 @@ public class memory {
 	}
 	
 	/*
+	 * insertNew
+	 * insert a new address to the memory
+	 * does not add if the address exists
+	 * @memoryAdd the address to add
+	 */
+	public void insertNew(int memoryAdd) {
+		if (memoryAdd + 16 > this.memCap)
+			return;
+		
+		
+		for (int i = 0; i < this.mem.size(); i++) {
+			if (this.mem.get(i)[0] == memoryAdd)
+				return;
+		}
+		
+		int[] newAdd = new int[17];
+		newAdd[0] = memoryAdd;
+		
+		for (int i = 0; i < this.mem.size(); i++) {
+			if (this.mem.get(i)[0] > memoryAdd) {
+				this.mem.add(i, newAdd);
+				return;
+			}
+		}
+		
+		
+		this.mem.add(newAdd);
+	}
+	
+	/*
 	 * setFromFile
 	 * read data to set from a file
 	 * @myFile String filename/path
