@@ -19,7 +19,8 @@ public class cs3421_emul {
 	 */
 	memory myMemory = new memory();
 	instructionMemory myIMem = new instructionMemory();
-	cpu myCpu = new cpu(myMemory, myIMem, myIMem.iMem);
+	cache myCache = new cache(myMemory);
+	cpu myCpu = new cpu(myMemory, myIMem, myIMem.iMem, myCache);
 	clock myClock = new clock(myCpu, myMemory);
 	
 	
@@ -238,6 +239,33 @@ public class cs3421_emul {
 				
 			}
 			break;
+			
+		// Start of the cache Commands
+			case "cache":
+						
+				switch (commandLine[1].toLowerCase()) {
+					// Reset the cache
+					case "reset":
+						myCache.reset();
+						break;
+						
+					// Turn on the Cache
+					case "on":
+						myCache.cacheOn();
+						break;
+						
+					// Turn off the Cache
+					case "off":
+						myCache.cacheOff();
+						break;
+							
+					// Dump the Cache
+					case "dump":
+						System.out.println(myCache.dump());
+						break;
+							
+					}
+					break;
 		}
 	}
 	

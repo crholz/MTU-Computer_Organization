@@ -14,6 +14,7 @@ public class cpu {
 	ArrayList<int[]> instructions;
 	memory memSetter;
 	instructionMemory inst;
+	cache cpuCache;
 	int location;
 	int memLoc;
 	int instime;
@@ -21,7 +22,7 @@ public class cpu {
 	int instrTime;
 	boolean isHalt;
 	
-	public cpu(memory memSrc, instructionMemory fetch, ArrayList<int[]> iMem) {
+	public cpu(memory memSrc, instructionMemory fetch, ArrayList<int[]> iMem, cache passCache) {
 		this.registers = new int[10];
 		this.registers[0] = 0;
 		this.getFrom = memSrc.mem;
@@ -34,6 +35,7 @@ public class cpu {
 		this.status = 0;
 		this.instrTime = 0;
 		this.isHalt = false;
+		this.cpuCache = passCache;
 	}
 	
 	// reset
@@ -165,7 +167,7 @@ public class cpu {
 		builder = "PC: 0x" + toHex(this.registers[0]) + "\n";
 		
 		// Dump each register
-		for (int i = 1; i < this.registers.length; i++) {
+		for (int i = 1; i < this.registers.length - 1; i++) {
 			builder = builder + "R" + (char) (65 + (i - 1)) + ": 0x" + toHex(this.registers[i]).toUpperCase();
 			if (i < 9) {
 				builder = builder + "\n";
@@ -219,6 +221,32 @@ public class cpu {
 			
 			this.registers[loadDestination] = getFrom.get(0)[this.registers[loadTarget] + 1];
 			
+			
+			// If Cache is on and cacheLine not set
+			if (cpuCache.getStatus() == true && cpuCache.getSet() == false) {
+				for (int i = 0; i < cpuCache.data.length; i++)
+					cpuCache.data[i] = getFrom.get(0)[i + 1];
+				
+				for (int i = 0; i < cpuCache.flags.length; i++)
+					cpuCache.flags[i] = 'V';
+				
+				cpuCache.isSet = true;
+			}
+			
+			
+			
+			// If Cache is on and cache line set, but does not match
+			else if (!cpuCache.checkCLO(getFrom.get(0)[this.registers[loadTarget]]) && cpuCache.getStatus() && cpuCache.getSet()) {
+				for (int i = 0; i < cpuCache.data.length; i++)
+					cpuCache.data[i] = getFrom.get(0)[i + 1];
+				
+				for (int i = 0; i < cpuCache.flags.length; i++)
+					cpuCache.flags[i] = 'V';
+				
+				cpuCache.cacheCLO = (int) ((getFrom.get(0)[this.registers[loadTarget] + 1])) / 8;
+			}
+			
+			
 			this.status = 0;
 			
 			break;
@@ -232,10 +260,51 @@ public class cpu {
 			
 			int[] toInsert = new int[1];
 			
-			toInsert[0] = this.registers[Integer.parseInt(sSrc, 2) + 1];
-			memSetter.set(0, 1, toInsert, this.registers[Integer.parseInt(sTrg, 2) + 1]);
 			
 			this.status = 0;
+			
+			// Case Where Valid Data but Miss
+			if (cpuCache.getStatus() && cpuCache.getSet() && !cpuCache.checkCLO(this.registers[Integer.parseInt(binString.substring(9,12), 2) + 1]) && cpuCache.allValid()) {
+				cpuCache.cacheCLO = (int) this.registers[Integer.parseInt(binString.substring(9,12), 2) + 1] / 8;
+				for (int i = 0; i < cpuCache.flags.length; i++)
+					cpuCache.flags[i] = 'I';
+				
+				cpuCache.data[Integer.parseInt(sSrc, 2)] = this.registers[Integer.parseInt(sSrc, 2) + 1];
+				cpuCache.writeLoc[Integer.parseInt(sSrc, 2)] = this.registers[Integer.parseInt(binString.substring(9,12), 2) + 1];
+				cpuCache.flags[Integer.parseInt(sSrc, 2)] = 'W';
+			}
+			
+			// Case Where Cache Hit
+			else if (cpuCache.getStatus() && cpuCache.getSet() && cpuCache.checkCLO(this.registers[Integer.parseInt(binString.substring(9,12), 2) + 1])) {
+				cpuCache.data[Integer.parseInt(sSrc, 2)] = this.registers[Integer.parseInt(sSrc, 2) + 1];
+				cpuCache.writeLoc[Integer.parseInt(sSrc, 2)] = this.registers[Integer.parseInt(binString.substring(9,12), 2) + 1];
+				cpuCache.flags[Integer.parseInt(sSrc, 2)] = 'W';
+			}
+			
+			// Case Where Cache Miss || Flush
+			else if (cpuCache.getStatus() && cpuCache.getSet() && (this.registers[Integer.parseInt(binString.substring(9, 12), 2) + 1] == 255 || (!cpuCache.checkCLO(this.registers[Integer.parseInt(binString.substring(9,12), 2) + 1]) && cpuCache.needWrite()))) {
+				if (!cpuCache.checkCLO(this.registers[Integer.parseInt(binString.substring(9,12), 2) + 1]) && this.registers[Integer.parseInt(binString.substring(9,12), 2) + 1] != 255) {
+					cpuCache.flush();
+					cpuCache.cacheCLO = (int) this.registers[Integer.parseInt(binString.substring(9,12), 2) + 1] / 8;
+					for (int i = 0; i < cpuCache.flags.length; i++)
+						cpuCache.flags[i] = 'I';
+					
+					cpuCache.data[Integer.parseInt(sSrc, 2)] = this.registers[Integer.parseInt(sSrc, 2) + 1];
+					cpuCache.writeLoc[Integer.parseInt(sSrc, 2)] = this.registers[Integer.parseInt(binString.substring(9,12), 2) + 1];
+					cpuCache.flags[Integer.parseInt(sSrc, 2)] = 'W';
+				}
+				
+				
+				
+				cpuCache.flush();
+				
+				
+			}
+				
+			if (!cpuCache.cacheStatus) {
+				toInsert[0] = this.registers[Integer.parseInt(sSrc, 2) + 1];
+				memSetter.set(0, 1, toInsert, this.registers[Integer.parseInt(sTrg, 2) + 1]);
+			}
 			
 			break;
 			
@@ -399,14 +468,46 @@ public class cpu {
 		// Uses Destination and Target
 		// Data Memory => Register
 		case "101":
+			int targetNum = Integer.parseInt(binString.substring(9, 12), 2) + 1;
+			
 			this.instrTime = 5;
+			
+			if (cpuCache.getStatus() && cpuCache.getSet() && cpuCache.checkCLO(getFrom.get(0)[this.registers[targetNum]]))
+				for (int i = 0; i < cpuCache.data.length; i++)
+					if ((getFrom.get(0)[this.registers[Integer.parseInt(binString.substring(9, 12), 2) + 1] + 1]) == cpuCache.data[i])
+						instrTime = 1;
+			
 			break;
 		
 		// Store Word
 		// Uses Source and Target
 		// Register => Data Memory
 		case "110":
-			this.instrTime = 5;
+			
+			// Forced Flush, equals 255 or there's a need to flush the cache
+			if (cpuCache.getStatus() && cpuCache.getSet() && (this.registers[Integer.parseInt(binString.substring(9, 12), 2) + 1] == 255 || (!cpuCache.checkCLO(this.registers[Integer.parseInt(binString.substring(9,12), 2) + 1]) && cpuCache.needWrite()))) {
+				this.instrTime = 1;
+				
+				for (int i = 0; i < cpuCache.data.length; i++) {
+					if (cpuCache.flags[i] == 'W' && cpuCache.data[i] != getFrom.get(0)[cpuCache.writeLoc[i] + 1])
+						this.instrTime = 5;
+				}
+			}
+			
+			// Cache Miss with all valid
+			else if (cpuCache.getStatus() && cpuCache.getSet() && !cpuCache.checkCLO(this.registers[Integer.parseInt(binString.substring(9,12), 2) + 1]) && cpuCache.allValid()) {
+					this.instrTime = 1;
+			}
+			
+			// Cache Hit
+			else if (cpuCache.getStatus() && cpuCache.getSet() && cpuCache.checkCLO(this.registers[Integer.parseInt(binString.substring(9,12), 2) + 1])) {
+				this.instrTime = 1;
+			}
+			
+			else {
+				this.instrTime = 5;
+			}
+			
 			break;
 			
 		
