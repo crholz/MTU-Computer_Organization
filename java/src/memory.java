@@ -179,6 +179,8 @@ public class memory {
 	    		 set(memAdd, setParams.length, setParams, memLoc);
 	    		 
 	         	}
+	    	 
+	    	 reader.close();
 	    	 } 
 	     catch (FileNotFoundException e) {
 	            e.printStackTrace();
@@ -222,7 +224,6 @@ public class memory {
 		int node = -1;
 		int amountLeft = hexAmount;
 		int additionalAdd = hexAddress;
-		boolean isWriting = false;
 		
 		// Create additional memory slots to be dumped if it extends
 		for (int i = 0; i < Math.ceil((double) hexAmount / 16); i++) {
@@ -241,7 +242,6 @@ public class memory {
 		// Walk through the memory dump
 		for (int i = 0; i < this.mem.size(); i++) {
 			if(i == node) {
-				isWriting = true;
 				builder = builder + "0x" + validateAdd(Integer.toHexString(this.mem.get(i)[0]).toUpperCase()) + " ";
 				for (int j = 1; j < this.mem.get(i).length; j++) {
 					if (j < loc + 1) {
@@ -272,7 +272,6 @@ public class memory {
 						amountLeft--;
 						if (amountLeft == 0) {
 							builder = builder + "\n";
-							isWriting = false;
 							break;
 						}	
 					}
@@ -281,7 +280,6 @@ public class memory {
 						builder = builder + validateSmall(Integer.toHexString(this.mem.get(i)[k]).toUpperCase()) + "\n";
 						amountLeft--;
 						if (amountLeft == 0) {
-							isWriting = false;
 							break;
 						}
 					}

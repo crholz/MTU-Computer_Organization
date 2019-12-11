@@ -6,7 +6,6 @@
  */
 
 import java.io.File;
-import java.math.*;
 import java.io.FileNotFoundException;
 import java.util.*;
 
@@ -164,6 +163,8 @@ public class instructionMemory {
 	    		 set(iMemAdd, setParams.length, setParams, iMemLoc);
 	    		 
 	         	}
+	    	 
+	    	 reader.close();
 	    	 } 
 	     catch (FileNotFoundException e) {
 	            e.printStackTrace();
@@ -206,7 +207,6 @@ public class instructionMemory {
 		int node = -1;
 		int amountLeft = hexAmount;
 		int additionalAdd = hexAddress;
-		boolean isWriting = false;
 		
 		// Create additional iMemory slots to be dumped if it extends
 		for (int i = 0; i < Math.ceil((double) hexAmount / 8); i++) {
@@ -225,7 +225,6 @@ public class instructionMemory {
 		// Walk through the iMemory dump
 		for (int i = 0; i < this.iMem.size(); i++) {
 			if(i == node) {
-				isWriting = true;
 				builder = builder + "0x" + validateAdd(Integer.toHexString(this.iMem.get(i)[0]).toUpperCase()) + " ";
 				for (int j = 1; j < this.iMem.get(i).length; j++) {
 					if (j < loc + 1) {
@@ -256,7 +255,6 @@ public class instructionMemory {
 						amountLeft--;
 						if (amountLeft == 0) {
 							builder = builder + "\n";
-							isWriting = false;
 							break;
 						}	
 					}
@@ -265,7 +263,6 @@ public class instructionMemory {
 						builder = builder + validateSmall(Integer.toHexString(this.iMem.get(i)[k]).toUpperCase()) + "\n";
 						amountLeft--;
 						if (amountLeft == 0) {
-							isWriting = false;
 							break;
 						}
 					}

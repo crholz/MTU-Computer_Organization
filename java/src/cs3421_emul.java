@@ -37,6 +37,8 @@ public class cs3421_emul {
 	    		 String line = reader.nextLine();
 	    		 parse(line);
 	         	}
+	    	 
+	    	 reader.close();
 	    	 } 
 	     catch (FileNotFoundException e) {
 	            e.printStackTrace();
