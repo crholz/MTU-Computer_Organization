@@ -15,6 +15,7 @@ public class cpu {
 	memory memSetter;
 	instructionMemory inst;
 	cache cpuCache;
+	iodev myIO;
 	int location;
 	int memLoc;
 	int instime;
@@ -22,7 +23,7 @@ public class cpu {
 	int instrTime;
 	boolean isHalt;
 	
-	public cpu(memory memSrc, instructionMemory fetch, ArrayList<int[]> iMem, cache passCache) {
+	public cpu(memory memSrc, instructionMemory fetch, ArrayList<int[]> iMem, cache passCache, iodev io) {
 		this.registers = new int[10];
 		this.registers[0] = 0;
 		this.getFrom = memSrc.mem;
@@ -36,6 +37,7 @@ public class cpu {
 		this.instrTime = 0;
 		this.isHalt = false;
 		this.cpuCache = passCache;
+		this.myIO = io;
 	}
 	
 	// reset
@@ -139,21 +141,56 @@ public class cpu {
 		}
 			
 		
-		// If currently doing an action
-		
-		/* Action is completed
-		if (instime % 5 == 0 && instime != 0) {
-			
-			int getFrom = this.inst.getAt(this.registers[0]);
-			int indexVal = (this.registers[0] % 8) + 1;
-			
-			// Takes instruction from PC
-			entropy((this.instructions.get(getFrom))[indexVal]);
-			
-			// Increment the PC
-			this.registers[0] += 1;
+		// For IO Device
+		if (!myIO.schedule.isEmpty() && this.registers[9] == myIO.schedule.get(myIO.currentTask).clockTick && !myIO.hasTask) {
+			myIO.hasTask = true;
+			myIO.cycles = 5;
 		}
-		*/
+		
+		else if (myIO.hasTask) {
+			// Perform task
+			if (myIO.cycles == 0) {
+				// If Writing
+				if (myIO.schedule.get(myIO.currentTask).task) {
+					int addr = myIO.schedule.get(myIO.currentTask).address;
+					// Get the Address to Set
+					String setMem = toHex(addr);
+					int loc = 0;
+							
+					// Find the base Address
+					if (setMem.split("x").length > 1) {
+						setMem = setMem.split("x")[1];
+					}
+					
+					setMem = validateAdd(setMem);
+					
+					loc = parseHex(setMem.substring(setMem.length() - 1));
+					if (setMem.length() > 1)
+						setMem = setMem.substring(0, setMem.length() - 1) + "0";
+					else
+						setMem = "0";
+							
+					// If running through command
+					int[] myParamSet = new int[1];
+					myParamSet[0] = myIO.schedule.get(myIO.currentTask).value;
+							
+					memSetter.set(parseHex(setMem), 1, myParamSet, loc);
+				}
+				
+				// If Reading
+				else {
+					// Get the address
+					myIO.register = getFrom.get(myIO.schedule.get(myIO.currentTask).address / 16)[(myIO.schedule.get(myIO.currentTask).address % 16) + 1];
+				}
+				
+				myIO.currentTask++;
+				myIO.hasTask = false;
+				myIO.cycles = 0;
+			}
+			
+			else
+				myIO.cycles--;
+		}
 		
 	}
 	
@@ -560,5 +597,26 @@ public class cpu {
 			break;
 		}
 			
+	}
+	
+	private String validateAdd(String hexStr) {
+		if (hexStr.length() >= 4)
+			return hexStr;
+		else
+			hexStr = "0" + hexStr;
+		
+		return validateAdd(hexStr);
+	}
+	
+	/*
+	 * parseHex
+	 * Parses a hex value into an integer to work with the number
+	 * easily in java.
+	 * @hexString String input of a hex value.
+	 */
+	private int parseHex(String hexString) {
+		if ((hexString.split("x")).length > 1)
+			hexString = hexString.split("x")[1];
+		return Integer.parseInt(hexString, 16);
 	}
 }

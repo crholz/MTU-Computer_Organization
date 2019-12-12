@@ -20,8 +20,10 @@ public class cs3421_emul {
 	memory myMemory = new memory();
 	instructionMemory myIMem = new instructionMemory();
 	cache myCache = new cache(myMemory);
-	cpu myCpu = new cpu(myMemory, myIMem, myIMem.iMem, myCache);
+	iodev myIO = new iodev(myMemory);
+	cpu myCpu = new cpu(myMemory, myIMem, myIMem.iMem, myCache, myIO);
 	clock myClock = new clock(myCpu, myMemory);
+	
 	
 	
 	/*
@@ -112,7 +114,7 @@ public class cs3421_emul {
 				
 				break;
 			
-			// Set a value in the Memory
+				// Set a value in the Memory
 			case "set":
 				
 				// Get the Address to Set
@@ -147,73 +149,73 @@ public class cs3421_emul {
 				myMemory.set(parseHex(setMem), parseHex(commandLine[3]), myParamSet, loc);
 				break;
 				
-			}
+				}
 			break;
 		
-			// Start of the instruction memory Commands
-			case "imemory":
+		// Start of the instruction memory Commands
+		case "imemory":
 						
-				switch(commandLine[1].toLowerCase()) {
+			switch(commandLine[1].toLowerCase()) {
 						
-					// Initiate the Memory
-					case "create":
-						myIMem.create(parseHex(commandLine[2]));
-						break;
+				// Initiate the Memory
+				case "create":
+					myIMem.create(parseHex(commandLine[2]));
+					break;
 							
-					// Reset the Memory
-					case "reset":
-						myIMem.reset();
-						break;
+				// Reset the Memory
+				case "reset":
+					myIMem.reset();
+					break;
 							
-					// Dump the Memory
-					case "dump":
-						String baseAdd = commandLine[2];
+				// Dump the Memory
+				case "dump":
+					String baseAdd = commandLine[2];
 							
-						// Find the base Address
-						baseAdd = baseAdd.substring(0, baseAdd.length() - 1);
-						baseAdd = baseAdd + "0";
+					// Find the base Address
+					baseAdd = baseAdd.substring(0, baseAdd.length() - 1);
+					baseAdd = baseAdd + "0";
 							
-						// Parse the location
-						String locAdd = commandLine[2].substring(commandLine[2].length() - 1);
+					// Parse the location
+					String locAdd = commandLine[2].substring(commandLine[2].length() - 1);
 							
-						int amount = parseHex(commandLine[3]);
-						System.out.println(myIMem.dump(parseHex(baseAdd), parseHex(locAdd), amount));
-						break;
+					int amount = parseHex(commandLine[3]);
+					System.out.println(myIMem.dump(parseHex(baseAdd), parseHex(locAdd), amount));
+					break;
 						
-					// Set a value in the Memory
-					case "set":
+				// Set a value in the Memory
+				case "set":
 							
-						// Get the Address to Set
-						String setMem = commandLine[2];
+					// Get the Address to Set
+					String setMem = commandLine[2];
 							
-						// Initiate the Location to Set
-						int loc = 0;
+					// Initiate the Location to Set
+					int loc = 0;
 							
-						// Find the base Address
-						if (commandLine[2].split("x").length > 1) {
-							setMem = commandLine[2].split("x")[1];
-						}
+					// Find the base Address
+					if (commandLine[2].split("x").length > 1) {
+						setMem = commandLine[2].split("x")[1];
+					}
 							
-						// Find the location
-						loc = parseHex(setMem.substring(setMem.length() - 1));
-						if (setMem.length() > 1)
-							setMem = setMem.substring(0, setMem.length() - 1) + "0";
-						else
-							setMem = "0";
+					// Find the location
+					loc = parseHex(setMem.substring(setMem.length() - 1));
+					if (setMem.length() > 1)
+						setMem = setMem.substring(0, setMem.length() - 1) + "0";
+					else
+						setMem = "0";
 							
-						// If reading from file
-						if (commandLine[3].toLowerCase().equals("file")) {
-							myIMem.setFromFile(commandLine[4] , parseHex(setMem), loc);
-							break;
-							}
-							
-						// If running through command
-						int[] myParamSet = new int[parseHex(commandLine[3])];
-						for (int i = 4; i < commandLine.length; i++)
-							myParamSet[i-4] = parseHex(commandLine[i]);
-							
-						myIMem.set(parseHex(setMem), parseHex(commandLine[3]), myParamSet, loc);
+					// If reading from file
+					if (commandLine[3].toLowerCase().equals("file")) {
+						myIMem.setFromFile(commandLine[4] , parseHex(setMem), loc);
 						break;
+					}
+							
+					// If running through command
+					int[] myParamSet = new int[parseHex(commandLine[3])];
+					for (int i = 4; i < commandLine.length; i++)
+						myParamSet[i-4] = parseHex(commandLine[i]);
+							
+					myIMem.set(parseHex(setMem), parseHex(commandLine[3]), myParamSet, loc);
+					break;
 							
 				}
 				
@@ -243,31 +245,99 @@ public class cs3421_emul {
 			break;
 			
 		// Start of the cache Commands
-			case "cache":
+		case "cache":
 						
-				switch (commandLine[1].toLowerCase()) {
-					// Reset the cache
-					case "reset":
-						myCache.reset();
-						break;
-						
-					// Turn on the Cache
-					case "on":
-						myCache.cacheOn();
-						break;
-						
-					// Turn off the Cache
-					case "off":
-						myCache.cacheOff();
-						break;
-							
-					// Dump the Cache
-					case "dump":
-						System.out.println(myCache.dump());
-						break;
-							
-					}
+			switch (commandLine[1].toLowerCase()) {
+				// Reset the cache
+				case "reset":
+					myCache.reset();
 					break;
+						
+				// Turn on the Cache
+				case "on":
+					myCache.cacheOn();
+					break;
+						
+				// Turn off the Cache
+				case "off":
+					myCache.cacheOff();
+					break;
+							
+				// Dump the Cache
+				case "dump":
+					System.out.println(myCache.dump());
+					break;
+							
+				}
+				break;
+					
+		// Start of the clock Commands
+		case "iodev":
+				
+			switch (commandLine[1].toLowerCase()) {
+				
+			// Reset the clock
+			case "reset":
+				myClock.reset();
+				break;
+				
+			// Send out a tick pulse
+			case "load":
+				
+				File file = new File(commandLine[2]);
+			    try {
+			    	Scanner reader = new Scanner(file);
+			    	int max = 0;
+			    	while (reader.hasNextLine()) {
+			    		String line = reader.nextLine();
+			    		String[] input = line.split("\n");
+			    		input = input[0].split(" ");
+			    		task item = new task(0, false, 0, 0);
+			    		if (input.length == 3)
+			    			item = new task(Integer.parseInt(input[0]), input[1].equals("writes"), parseHex(input[2]), 0);
+			    		
+			    		else if (input.length == 4)
+			    			item = new task(Integer.parseInt(input[0]), input[1].equals("writes"), parseHex(input[2]), parseHex(input[3]));
+			    		
+			    		if (input.length == 3 || input.length == 4) {
+			    			if (myIO.schedule.isEmpty()) {
+		    					myIO.schedule.add(item);
+		    					max = item.clockTick;
+		    				}
+			    			
+			    			else {
+			    				for (int i = 0; i < myIO.schedule.size(); i++) {
+				    				
+				    				if (item.clockTick <= myIO.schedule.get(i).clockTick) {
+				    					myIO.schedule.add(i, item);
+				    					break;
+				    				}
+				    				
+				    				else if (item.clockTick >= max) {
+				    					myIO.schedule.add(item);
+				    					max = item.clockTick;
+				    				}
+				    				
+				    			}
+			    			}
+			    		}
+			        }
+			    	 
+			    	reader.close();
+			    } 
+			    catch (FileNotFoundException e) {
+			    	e.printStackTrace();
+			    }
+				
+				break;
+					
+			// Dump the clock values
+			case "dump":
+				System.out.println(myIO.dump());
+				break;
+					
+			}
+			break;
 		}
 	}
 	
