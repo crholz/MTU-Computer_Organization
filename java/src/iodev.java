@@ -21,6 +21,10 @@ public class iodev {
 	memory memEdit;
 	ArrayList<task> schedule;
 	
+	/*
+	 * IO Device Constructor
+	 * @linkedMem the memory that will be used with the device
+	 */
 	public iodev(memory linkedMem) {
 		this.memEdit = linkedMem;
 		this.register = 0;
@@ -31,6 +35,10 @@ public class iodev {
 		this.clock = 0;
 	}
 	
+	/*
+	 * reset
+	 * Reset the IO device
+	 */
 	public void reset() {
 		this.schedule.clear();
 		this.register = 0;
@@ -40,6 +48,11 @@ public class iodev {
 		this.clock = 0;
 	}
 	
+	/*
+	 * dump
+	 * Dumps the contents of the IO Device's Register
+	 * @returns a string of the dump
+	 */
 	public String dump() {
 		return "IO Device: 0x" + validateSmall(Integer.toHexString(this.register)).toUpperCase() + "\n";
 	}

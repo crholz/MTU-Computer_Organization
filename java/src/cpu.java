@@ -177,6 +177,10 @@ public class cpu {
 		return builder.toUpperCase();
 	}
 	
+	/*
+	 * ioLink
+	 * Runs the cycle for the IO device, always runs even if cpu is halted.
+	 */
 	public void ioLink() {
 		// For IO Device
 		if (!myIO.hasTask && !myIO.schedule.isEmpty() && myIO.schedule.size() > myIO.currentTask && myIO.clock == myIO.schedule.get(myIO.currentTask).clockTick && !myIO.hasTask) {

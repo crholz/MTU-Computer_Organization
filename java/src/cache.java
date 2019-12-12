@@ -19,6 +19,10 @@ public class cache {
 	char[] flags;
 	int[] writeLoc;
 	
+	/*
+	 * Cache Constructor
+	 * @linked the linked memory with the cache
+	 */
 	public cache(memory linked) {
 		this.data = new int[8];
 		this.flags = new char[8];
@@ -41,6 +45,10 @@ public class cache {
 		}
 	}
 	
+	/*
+	 * reset
+	 * clear and reset the cache
+	 */
 	public void reset() {
 		this.cacheStatus = false;
 		for (int i = 0; i < this.data.length; i++) {
@@ -51,19 +59,35 @@ public class cache {
 		}
 	}
 	
+	/*
+	 * cacheOn
+	 * Turn on the Cache
+	 */
 	public void cacheOn() {
 		this.cacheStatus = true;
 	}
 	
+	/*
+	 * cacheOff
+	 * Turn off the Cache
+	 */
 	public void cacheOff() {
 		flush();
 		this.cacheStatus = false;
 	}
 	
+	/*
+	 * getStatus
+	 * @returns if the cache is on or off
+	 */
 	public boolean getStatus() {
 		return this.cacheStatus;
 	}
 	
+	/*
+	 * getSet
+	 * @returns if the cache as been set
+	 */
 	public boolean getSet() {
 		return this.isSet;
 	}
@@ -83,7 +107,11 @@ public class cache {
 		
 	}
 	
-	// Returns if true if all data is invalid
+	/*
+	 * allInvalid
+	 * Determines if the data in the cache is marked as not valid
+	 * @returns true or false if the data is not valid
+	 */
 	public boolean allInvalid() {
 		boolean notValid = true;
 		
@@ -94,7 +122,11 @@ public class cache {
 		return notValid;
 	}
 	
-	// Returns if true if all data is invalid
+	/*
+	 * allValid
+	 * Determines if the data in the cache is marked as valid
+	 * @returns true or false if the data is valid
+	 */
 	public boolean allValid() {
 		boolean isValid = true;
 			
@@ -105,6 +137,11 @@ public class cache {
 			return isValid;
 		}
 	
+	/*
+	 * needsWrite
+	 * Determines if there is a write that needs to occur
+	 * @returns true or false if the cache needs to be written
+	 */
 	public boolean needWrite() {
 		boolean isWrites = false;
 		
@@ -117,7 +154,11 @@ public class cache {
 	}
 		
 	
-		
+	/*
+	 * checkCLO
+	 * Checks to see if the cache is still in the correct CLO
+	 * @returns true or false
+	 */
 	public boolean checkCLO(int amount) {
 		int divis = (int) amount / 8;
 		
@@ -126,6 +167,11 @@ public class cache {
 		return this.cacheCLO == divis;
 	}
 	
+	/*
+	 * dump
+	 * Dumps the contents of the cache
+	 * @returns String of the dump
+	 */
 	public String dump() {
 		String builder = "";
 		builder = builder + "CLO        : 0x" + toHex(this.cacheCLO) + "\n";

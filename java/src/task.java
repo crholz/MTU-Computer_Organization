@@ -5,6 +5,10 @@ public class task {
 	int address;		// Address Stored
 	int value;			// Value if write task
 	
+	/*
+	 * Constructor for Task object
+	 * Item for schedule.
+	 */
 	public task(int tick, boolean tk, int add, int val) {
 		this.clockTick = tick;
 		this.task = tk;
