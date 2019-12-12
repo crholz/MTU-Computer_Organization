@@ -294,10 +294,10 @@ public class cs3421_emul {
 			    		input = input[0].split(" ");
 			    		task item = new task(0, false, 0, 0);
 			    		if (input.length == 3)
-			    			item = new task(Integer.parseInt(input[0]), input[1].equals("writes"), parseHex(input[2]), 0);
+			    			item = new task(Integer.parseInt(input[0]), input[1].equals("write"), parseHex(input[2]), 0);
 			    		
 			    		else if (input.length == 4)
-			    			item = new task(Integer.parseInt(input[0]), input[1].equals("writes"), parseHex(input[2]), parseHex(input[3]));
+			    			item = new task(Integer.parseInt(input[0]), input[1].equals("write"), parseHex(input[2]), parseHex(input[3]));
 			    		
 			    		if (input.length == 3 || input.length == 4) {
 			    			if (myIO.schedule.isEmpty()) {

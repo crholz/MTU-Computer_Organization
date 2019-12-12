@@ -142,7 +142,7 @@ public class cpu {
 			
 		
 		// For IO Device
-		if (!myIO.schedule.isEmpty() && this.registers[9] == myIO.schedule.get(myIO.currentTask).clockTick && !myIO.hasTask) {
+		if (!myIO.hasTask && !myIO.schedule.isEmpty() && myIO.schedule.size() > myIO.currentTask && this.registers[9] == myIO.schedule.get(myIO.currentTask).clockTick && !myIO.hasTask) {
 			myIO.hasTask = true;
 			myIO.cycles = 5;
 		}
@@ -150,8 +150,10 @@ public class cpu {
 		else if (myIO.hasTask) {
 			// Perform task
 			if (myIO.cycles == 0) {
+				System.out.println("Printing");
 				// If Writing
 				if (myIO.schedule.get(myIO.currentTask).task) {
+					
 					int addr = myIO.schedule.get(myIO.currentTask).address;
 					// Get the Address to Set
 					String setMem = toHex(addr);
@@ -178,8 +180,14 @@ public class cpu {
 				}
 				
 				// If Reading
-				else {
+				else if (!myIO.schedule.get(myIO.currentTask).task){
 					// Get the address
+					System.out.println("Getting!");
+					memSetter.instZero();
+					for (int i = 0; i < (myIO.schedule.get(myIO.currentTask).address / 16); i++) {
+						memSetter.insertNew(i * 16);
+					}
+					
 					myIO.register = getFrom.get(myIO.schedule.get(myIO.currentTask).address / 16)[(myIO.schedule.get(myIO.currentTask).address % 16) + 1];
 				}
 				
@@ -258,9 +266,21 @@ public class cpu {
 			for (int i = 0; i < 16; i++) {
 				memSetter.insertNew(i * 16);
 			}
+
+			if (this.registers[loadTarget]== 0xFF) {
+				cpuCache.isSet = false;
+				for (int i = 0; i < cpuCache.flags.length; i++) {
+					cpuCache.flags[i] = 'I';
+				}
+				this.status = 0;
+				break;									// Was a return in testing
+			}
 			
 			this.registers[loadDestination] = getFrom.get((int) this.registers[loadTarget] / 16)[(this.registers[loadTarget] % 16) + 1];
 			
+			if (cpuCache.getStatus() && cpuCache.getSet() && cpuCache.checkCLO(getFrom.get((int) this.registers[loadTarget] / 16)[this.registers[loadTarget] % 16])) {
+				this.registers[loadDestination] = cpuCache.data[getFrom.get((int) this.registers[loadTarget] / 16)[(this.registers[loadTarget] % 16)]];
+			}
 			
 			// If Cache is on and cacheLine not set
 			if (cpuCache.getStatus() == true && cpuCache.getSet() == false) {
@@ -273,8 +293,6 @@ public class cpu {
 				cpuCache.isSet = true;
 			}
 			
-			
-			
 			// If Cache is on and cache line set, but does not match
 			else if (cpuCache.getStatus() && cpuCache.getSet() && !cpuCache.checkCLO(getFrom.get((int) this.registers[loadTarget] / 16)[(this.registers[loadTarget] % 16)])) {
 				for (int i = 0; i < cpuCache.data.length; i++)
@@ -285,7 +303,6 @@ public class cpu {
 				
 				cpuCache.cacheCLO = (int) ((getFrom.get(0)[this.registers[loadTarget] + 1])) / 8;
 			}
-			
 			
 			this.status = 0;
 			
@@ -302,6 +319,7 @@ public class cpu {
 			
 			
 			this.status = 0;
+
 			
 			// Case Where Valid Data but Miss
 			if (cpuCache.getStatus() && cpuCache.getSet() && !cpuCache.checkCLO(this.registers[Integer.parseInt(binString.substring(9,12), 2) + 1]) && cpuCache.allValid()) {
@@ -339,6 +357,17 @@ public class cpu {
 				cpuCache.flush();
 				
 				
+			}
+			
+			// If Cache is on and cacheLine not set
+			else if (cpuCache.getStatus() == true && cpuCache.getSet() == false) {
+				for (int i = 0; i < cpuCache.data.length; i++)
+					cpuCache.data[i] = 0;
+							
+				for (int i = 0; i < cpuCache.flags.length; i++)
+					cpuCache.flags[i] = 'I';
+							
+				cpuCache.isSet = true;
 			}
 				
 			if (!cpuCache.cacheStatus) {
@@ -380,6 +409,7 @@ public class cpu {
 			String addiSrc = binString.substring(6, 9);
 			String addiIV = binString.substring(12, binString.length());
 			String addiDst = binString.substring(3, 6);
+			
 			
 			int addiSource = this.registers[Integer.parseInt(addiSrc, 2) + 1];
 			int addiImmediate = Integer.parseInt(addiIV, 2);
@@ -509,7 +539,6 @@ public class cpu {
 		// Data Memory => Register
 		case "101":
 			int targetNum = Integer.parseInt(binString.substring(9, 12), 2) + 1;
-			
 			this.instrTime = 5;
 			
 			for (int i = 1; i < 16; i++) {
@@ -518,7 +547,7 @@ public class cpu {
 			
 			if (cpuCache.getStatus() && cpuCache.getSet() && cpuCache.checkCLO(getFrom.get((int) this.registers[targetNum] / 16)[this.registers[targetNum] % 16]))
 				for (int i = 0; i < cpuCache.data.length; i++)
-					if ((getFrom.get((int) this.registers[targetNum] / 16)[this.registers[targetNum] % 16]) == cpuCache.data[i])
+					if ((getFrom.get((int) this.registers[targetNum] / 16)[this.registers[targetNum] % 16] + 1) == cpuCache.data[i])
 						instrTime = 1;
 			
 			break;
@@ -552,6 +581,8 @@ public class cpu {
 				this.instrTime = 5;
 			}
 			
+			System.out.println("Time: " + instrTime);
+			
 			break;
 			
 		
@@ -567,6 +598,7 @@ public class cpu {
 		// Source + IV => Destination (8 bit two's complement)
 		case "001":
 			this.instrTime = 1;
+			System.out.println("Time: " + instrTime);
 			break;
 			
 		// mul
@@ -594,6 +626,7 @@ public class cpu {
 		// Ignores future clock ticks
 		case "111":
 			this.instrTime = 1;
+			System.out.println("Time: " + instrTime);
 			break;
 		}
 			

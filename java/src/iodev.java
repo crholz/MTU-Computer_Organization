@@ -38,7 +38,7 @@ public class iodev {
 	}
 	
 	public String dump() {
-		return "IO Device: " + validateSmall(Integer.toHexString(this.register));
+		return "IO Device: 0x" + validateSmall(Integer.toHexString(this.register)).toUpperCase();
 	}
 	
 	/*
