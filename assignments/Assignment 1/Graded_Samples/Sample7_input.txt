@@ -1,0 +1,13 @@
+clock reset
+memory create 0x10000
+memory reset
+memory set 0x1A20 file /home/campus08/sbandar1/Downloads/InputFiles/Sample7_datafile.txt
+clock dump
+cpu reset
+cpu set reg PC 0x1A20
+clock tick 2
+clock dump
+clock reset
+clock tick 4
+clock dump
+cpu dump 

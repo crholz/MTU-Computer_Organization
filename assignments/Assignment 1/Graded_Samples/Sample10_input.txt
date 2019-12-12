@@ -1,0 +1,5 @@
+memory create 0x10000
+memory reset
+memory set 0x1A40 file /home/campus08/sbandar1/Downloads/InputFiles/Sample10_datafile.txt
+memory set 0x1A44 0x04 0xAD 0xDE 0xEF 0xA8
+memory dump 0x1A40 0x08

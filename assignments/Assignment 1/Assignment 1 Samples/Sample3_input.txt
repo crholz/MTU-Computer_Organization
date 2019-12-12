@@ -1,0 +1,4 @@
+memory create 0x10000
+memory reset
+memory set 0x10 file Sample3_datafile.txt
+memory dump 0x10 0x04
