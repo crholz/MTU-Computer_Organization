@@ -139,66 +139,6 @@ public class cpu {
 			if (compTime == instrTime)
 				this.registers[0]++;
 		}
-			
-		
-		// For IO Device
-		if (!myIO.hasTask && !myIO.schedule.isEmpty() && myIO.schedule.size() > myIO.currentTask && this.registers[9] == myIO.schedule.get(myIO.currentTask).clockTick && !myIO.hasTask) {
-			myIO.hasTask = true;
-			myIO.cycles = 5;
-		}
-		
-		else if (myIO.hasTask) {
-			// Perform task
-			if (myIO.cycles == 0) {
-				System.out.println("Printing");
-				// If Writing
-				if (myIO.schedule.get(myIO.currentTask).task) {
-					
-					int addr = myIO.schedule.get(myIO.currentTask).address;
-					// Get the Address to Set
-					String setMem = toHex(addr);
-					int loc = 0;
-							
-					// Find the base Address
-					if (setMem.split("x").length > 1) {
-						setMem = setMem.split("x")[1];
-					}
-					
-					setMem = validateAdd(setMem);
-					
-					loc = parseHex(setMem.substring(setMem.length() - 1));
-					if (setMem.length() > 1)
-						setMem = setMem.substring(0, setMem.length() - 1) + "0";
-					else
-						setMem = "0";
-							
-					// If running through command
-					int[] myParamSet = new int[1];
-					myParamSet[0] = myIO.schedule.get(myIO.currentTask).value;
-							
-					memSetter.set(parseHex(setMem), 1, myParamSet, loc);
-				}
-				
-				// If Reading
-				else if (!myIO.schedule.get(myIO.currentTask).task){
-					// Get the address
-					System.out.println("Getting!");
-					memSetter.instZero();
-					for (int i = 0; i < (myIO.schedule.get(myIO.currentTask).address / 16); i++) {
-						memSetter.insertNew(i * 16);
-					}
-					
-					myIO.register = getFrom.get(myIO.schedule.get(myIO.currentTask).address / 16)[(myIO.schedule.get(myIO.currentTask).address % 16) + 1];
-				}
-				
-				myIO.currentTask++;
-				myIO.hasTask = false;
-				myIO.cycles = 0;
-			}
-			
-			else
-				myIO.cycles--;
-		}
 		
 	}
 	
@@ -235,6 +175,67 @@ public class cpu {
 			builder = "0" + builder;
 		
 		return builder.toUpperCase();
+	}
+	
+	public void ioLink() {
+		// For IO Device
+		if (!myIO.hasTask && !myIO.schedule.isEmpty() && myIO.schedule.size() > myIO.currentTask && myIO.clock == myIO.schedule.get(myIO.currentTask).clockTick && !myIO.hasTask) {
+			myIO.hasTask = true;
+			myIO.cycles = 5;
+		}
+				
+		else if (myIO.hasTask) {
+		// Perform task
+			if (myIO.cycles == 0) {
+					// If Writing
+					if (myIO.schedule.get(myIO.currentTask).task) {
+							
+						int addr = myIO.schedule.get(myIO.currentTask).address;
+						// Get the Address to Set
+						String setMem = toHex(addr);
+						int loc = 0;
+									
+						// Find the base Address
+						if (setMem.split("x").length > 1) {
+							setMem = setMem.split("x")[1];
+						}
+							
+						setMem = validateAdd(setMem);
+							
+						loc = parseHex(setMem.substring(setMem.length() - 1));
+						if (setMem.length() > 1)
+							setMem = setMem.substring(0, setMem.length() - 1) + "0";
+						else
+							setMem = "0";
+									
+						// If running through command
+						int[] myParamSet = new int[1];
+						myParamSet[0] = myIO.schedule.get(myIO.currentTask).value;
+									
+						memSetter.set(parseHex(setMem), 1, myParamSet, loc);
+					}
+						
+					// If Reading
+					else if (!myIO.schedule.get(myIO.currentTask).task){
+						// Get the address
+						memSetter.instZero();
+						for (int i = 0; i < (myIO.schedule.get(myIO.currentTask).address / 16); i++) {
+							memSetter.insertNew(i * 16);
+						}
+							
+						myIO.register = getFrom.get(myIO.schedule.get(myIO.currentTask).address / 16)[(myIO.schedule.get(myIO.currentTask).address % 16) + 1];
+					}
+						
+					myIO.currentTask++;
+					myIO.hasTask = false;
+					myIO.cycles = 0;
+			}
+					
+			else
+				myIO.cycles--;
+			}
+		
+		myIO.clock++;
 	}
 	
 	/*
@@ -581,8 +582,6 @@ public class cpu {
 				this.instrTime = 5;
 			}
 			
-			System.out.println("Time: " + instrTime);
-			
 			break;
 			
 		
@@ -598,7 +597,6 @@ public class cpu {
 		// Source + IV => Destination (8 bit two's complement)
 		case "001":
 			this.instrTime = 1;
-			System.out.println("Time: " + instrTime);
 			break;
 			
 		// mul
@@ -626,7 +624,6 @@ public class cpu {
 		// Ignores future clock ticks
 		case "111":
 			this.instrTime = 1;
-			System.out.println("Time: " + instrTime);
 			break;
 		}
 			

@@ -58,11 +58,15 @@ public class clock {
 	 * Cycle the CPU
 	 */
 	public void tick() {
-		if (this.linkedCPU.isHalt)
+		if (this.linkedCPU.isHalt) {
+			this.linkedCPU.ioLink();
 			return;
+		}
+			
 		
 		this.count += 1;
 		this.linkedCPU.eCycle();
+		this.linkedCPU.ioLink();
 	}
 	
 	

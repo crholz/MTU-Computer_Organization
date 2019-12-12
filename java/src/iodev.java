@@ -14,6 +14,7 @@ import java.util.ArrayList;
 
 public class iodev {
 	int register;
+	int clock;
 	boolean hasTask;
 	int currentTask;
 	int cycles;
@@ -27,6 +28,7 @@ public class iodev {
 		this.schedule = new ArrayList<task>();
 		this.hasTask = false;
 		this.cycles = 0;
+		this.clock = 0;
 	}
 	
 	public void reset() {
@@ -35,10 +37,11 @@ public class iodev {
 		this.currentTask = 0;
 		this.hasTask = false;
 		this.cycles = 0;
+		this.clock = 0;
 	}
 	
 	public String dump() {
-		return "IO Device: 0x" + validateSmall(Integer.toHexString(this.register)).toUpperCase();
+		return "IO Device: 0x" + validateSmall(Integer.toHexString(this.register)).toUpperCase() + "\n";
 	}
 	
 	/*
